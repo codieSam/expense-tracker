@@ -47,6 +47,17 @@ func saveExpenses(expenses []Expense) error {
 	return nil
 }
 
+func nextFunctionId(expenses []Expense) int {
+	maxID := 0
+
+	for _, expense := range expenses {
+		if expense.ID > maxID {
+			maxID = expense.ID
+		}
+
+	}
+	return maxID + 1
+}
 func main() {
 	fmt.Println("Welcome to expense-tracker")
 	expenses, err := loadExpenses()
@@ -87,8 +98,14 @@ func main() {
 			Date:        time.Now(),
 		}
 		// fmt.Println(expense)
+		expense.ID = nextFunctionId(expenses)
 		expenses = append(expenses, expense)
-		saveExpenses(expenses)
+		err = saveExpenses(expenses)
+		if err != nil {
+			fmt.Println("Error while saving the expenses", err)
+			return
+		}
+		fmt.Printf("Expense added successfully with (ID: %d) & (Description: %q)", expense.ID, expense.Description)
 	} else {
 		fmt.Println(`Usage: go run . add --description "Grocery" --amount 20.32`)
 		return
