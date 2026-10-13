@@ -65,7 +65,6 @@ func main() {
 		fmt.Println("Error while loading the file")
 		return
 	}
-	fmt.Println(expenses)
 
 	var desc string
 	var amount string
@@ -106,6 +105,21 @@ func main() {
 			return
 		}
 		fmt.Printf("Expense added successfully with (ID: %d) & (Description: %q)", expense.ID, expense.Description)
+	} else if len(os.Args) == 2 {
+
+		command := os.Args[1]
+		if command == "list" {
+			if len(expenses) == 0 {
+				fmt.Println("No expenses found.")
+				return
+			}
+			for i := range expenses {
+				fmt.Printf("ID: %d | Description: %s | Amount: %.2f | Time: %s\n", expenses[i].ID, expenses[i].Description, expenses[i].Amount, expenses[i].Date.Format("2006-01-02"))
+			}
+
+		} else {
+			fmt.Println("Command not found.")
+		}
 	} else {
 		fmt.Println(`Usage: go run . add --description "Grocery" --amount 20.32`)
 		return
