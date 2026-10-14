@@ -131,9 +131,11 @@ func main() {
 			fmt.Println("Command not found.")
 		}
 	} else if len(os.Args) == 8 {
+
 		id, err := strconv.Atoi(os.Args[3])
+
 		if err != nil {
-			fmt.Println("Error while converting string ID into int")
+			fmt.Println("Error while converting string ID into int", err)
 			return
 		}
 
@@ -145,9 +147,24 @@ func main() {
 		} else {
 			amountToUpdate, err := strconv.ParseFloat(os.Args[7], 64)
 			if err != nil {
-				fmt.Println("Erreor while converting amountToUpdate to int", err)
+				fmt.Println("Erreor while converting amountToUpdate to float", err)
 				return
 			}
+			description := strings.TrimSpace(os.Args[5])
+			if description == "" {
+				fmt.Println("Please enter the valid description")
+				return
+			} else if amountToUpdate <= 0 {
+				fmt.Println("Please enter the amount more than 0.")
+				return
+			} else if math.IsNaN(amountToUpdate) == true {
+				fmt.Println("Please enter a valid amound")
+				return
+			} else if math.IsInf(amountToUpdate, 0) == true {
+				fmt.Println("Please enter a valid amound")
+				return
+			}
+
 			expenses[index].Description = os.Args[5]
 			expenses[index].Amount = float64(amountToUpdate)
 			err = saveExpenses(expenses)
