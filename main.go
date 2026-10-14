@@ -174,8 +174,26 @@ func main() {
 			}
 			fmt.Printf("Expense with id: %d is updated successfully", expenses[index].ID)
 		}
+	} else if len(os.Args) == 4 && os.Args[1] == "delete" && os.Args[2] == "--id" {
+		intID, err := strconv.Atoi(os.Args[3])
+		if err != nil {
+			fmt.Println("Error while covrting to int on delete function", err)
+			return
+		}
+		index := findExpenseIndex(expenses, intID)
+		if index == 1 {
+			fmt.Println("No expenses found.")
+			return
+		}
+		expenses = append(expenses[:index], expenses[index+1:]...)
+		err = saveExpenses(expenses)
+		if err != nil {
+			fmt.Println("Error while saving the data after deletion", err)
+			return
+		}
+		fmt.Printf("Expense with id:  %d is deleted.", intID)
 	} else {
-		fmt.Println(`Usage: go run . add --description "Grocery" --amount 20.32`)
+		fmt.Println("Please use correct command")
 		return
 	}
 
