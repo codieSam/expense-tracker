@@ -58,6 +58,16 @@ func nextFunctionId(expenses []Expense) int {
 	}
 	return maxID + 1
 }
+
+func findExpenseIndex(expenses []Expense, id int) int {
+	for i, expense := range expenses {
+		if expense.ID == id {
+			return i
+		}
+	}
+	return -1
+}
+
 func main() {
 	fmt.Println("Welcome to expense-tracker")
 	expenses, err := loadExpenses()
@@ -119,6 +129,33 @@ func main() {
 
 		} else {
 			fmt.Println("Command not found.")
+		}
+	} else if len(os.Args) == 8 {
+		id, err := strconv.Atoi(os.Args[3])
+		if err != nil {
+			fmt.Println("Error while converting string ID into int")
+			return
+		}
+
+		index := findExpenseIndex(expenses, id)
+		// fmt.Println(index)
+		if index == -1 {
+			fmt.Println("Expense doesn't found.")
+			return
+		} else {
+			amountToUpdate, err := strconv.ParseFloat(os.Args[7], 64)
+			if err != nil {
+				fmt.Println("Erreor while converting amountToUpdate to int", err)
+				return
+			}
+			expenses[index].Description = os.Args[5]
+			expenses[index].Amount = float64(amountToUpdate)
+			err = saveExpenses(expenses)
+			if err != nil {
+				fmt.Println("Error while saving the updated expense.", err)
+				return
+			}
+			fmt.Printf("Expense with id: %d is updated successfully", expenses[index].ID)
 		}
 	} else {
 		fmt.Println(`Usage: go run . add --description "Grocery" --amount 20.32`)
