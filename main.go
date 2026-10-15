@@ -127,8 +127,12 @@ func main() {
 				fmt.Printf("ID: %d | Description: %s | Amount: %.2f | Time: %s\n", expenses[i].ID, expenses[i].Description, expenses[i].Amount, expenses[i].Date.Format("2006-01-02"))
 			}
 
-		} else {
-			fmt.Println("Command not found.")
+		} else if command == "summary" {
+			totalExpense := 0.0
+			for _, expense := range expenses {
+				totalExpense += expense.Amount
+			}
+			fmt.Printf("The total expenses is : $%.2f\n", totalExpense)
 		}
 	} else if len(os.Args) == 8 {
 
@@ -174,24 +178,44 @@ func main() {
 			}
 			fmt.Printf("Expense with id: %d is updated successfully", expenses[index].ID)
 		}
-	} else if len(os.Args) == 4 && os.Args[1] == "delete" && os.Args[2] == "--id" {
-		intID, err := strconv.Atoi(os.Args[3])
-		if err != nil {
-			fmt.Println("Error while covrting to int on delete function", err)
-			return
+	} else if len(os.Args) == 4 {
+		if os.Args[1] == "delete" && os.Args[2] == "--id" {
+			intID, err := strconv.Atoi(os.Args[3])
+			if err != nil {
+				fmt.Println("Error while covrting to int on delete function", err)
+				return
+			}
+			index := findExpenseIndex(expenses, intID)
+			if index == 1 {
+				fmt.Println("No expenses found.")
+				return
+			}
+			expenses = append(expenses[:index], expenses[index+1:]...)
+			err = saveExpenses(expenses)
+			if err != nil {
+				fmt.Println("Error while saving the data after deletion", err)
+				return
+			}
+			fmt.Printf("Expense with id:  %d is deleted.", intID)
+		} else if os.Args[1] == "summary" && os.Args[2] == "--month" {
+			givenMonth := os.Args[3]
+			month, err := strconv.Atoi(givenMonth)
+			totalExpenseOfMonth := 0.0
+			if err != nil {
+				fmt.Println("Error while converting month to  int.", err)
+				return
+			}
+
+			for _, expense := range expenses {
+				if time.Month(month) == expense.Date.Month() {
+					totalExpenseOfMonth += expense.Amount
+				}
+
+			}
+			fmt.Printf("Total Expense of %s is: $%.2f\n", givenMonth, totalExpenseOfMonth)
+
 		}
-		index := findExpenseIndex(expenses, intID)
-		if index == 1 {
-			fmt.Println("No expenses found.")
-			return
-		}
-		expenses = append(expenses[:index], expenses[index+1:]...)
-		err = saveExpenses(expenses)
-		if err != nil {
-			fmt.Println("Error while saving the data after deletion", err)
-			return
-		}
-		fmt.Printf("Expense with id:  %d is deleted.", intID)
+
 	} else {
 		fmt.Println("Please use correct command")
 		return
