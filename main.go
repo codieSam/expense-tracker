@@ -90,6 +90,22 @@ func saveMonthlyBudgetLimit(monthlyLimit MonthlyBudgetLimit) error {
 	return nil
 }
 
+func loadMonthlyBudgetLimit() (MonthlyBudgetLimit, error) {
+	data, err := os.ReadFile("monthly_budget.json")
+	if err != nil {
+		fmt.Println("Error while reading the expenses.json", err)
+		return MonthlyBudgetLimit{}, err
+	}
+	var monthlyLimit MonthlyBudgetLimit
+
+	err = json.Unmarshal(data, &monthlyLimit)
+	if err != nil {
+		fmt.Println("Error while encoding the data after loading monthlybudgetexpenselimit")
+		return MonthlyBudgetLimit{}, err
+	}
+	return monthlyLimit, nil
+}
+
 func main() {
 	fmt.Println("Welcome to expense-tracker")
 	expenses, err := loadExpenses()
@@ -166,6 +182,34 @@ func main() {
 				totalExpense += expense.Amount
 			}
 			fmt.Printf("The total expenses is : $%.2f\n", totalExpense)
+		} else if command == "budget" {
+			totalExpense := 0.0
+
+			for _, expense := range expenses {
+				if expense.Date.Month() == time.Now().Month() && expense.Date.Year() == time.Now().Year() {
+					totalExpense += expense.Amount
+				}
+
+			}
+
+			loadedLimit, err := loadMonthlyBudgetLimit()
+			if err != nil {
+				fmt.Println("Error while loading the budget limit")
+				return
+			}
+			loadedLimitValue := loadedLimit.MonthlyBudgetLimit
+			remainingExpense := loadedLimitValue - totalExpense
+			if loadedLimitValue <= totalExpense {
+				fmt.Println("Warning: You have reached or exceeded your monthly budget!")
+
+			}
+			fmt.Printf("The monthly budget limit is : %.2f\n", loadedLimitValue)
+			fmt.Printf("The total expense is : %.2f\n", totalExpense)
+			if remainingExpense < 0 {
+				fmt.Printf("You have exceeded your budget by: £%.2f\n", -remainingExpense)
+			} else {
+				fmt.Printf("Remaining budget: £%.2f\n", remainingExpense)
+			}
 		}
 	} else if len(os.Args) == 8 && os.Args[6] == "--update" {
 
