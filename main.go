@@ -162,7 +162,8 @@ func main() {
 	} else if len(os.Args) == 2 {
 
 		command := os.Args[1]
-		if command == "list" {
+		switch command {
+		case "list":
 			if len(expenses) == 0 {
 				fmt.Println("No expenses found.")
 				return
@@ -175,14 +176,13 @@ func main() {
 				}
 				fmt.Printf("ID: %d | Description: %s | Amount: %.2f | Category: %s | Time: %s\n", expenses[i].ID, expenses[i].Description, expenses[i].Amount, category, expenses[i].Date.Format("2006-01-02"))
 			}
-
-		} else if command == "summary" {
+		case "summary":
 			totalExpense := 0.0
 			for _, expense := range expenses {
 				totalExpense += expense.Amount
 			}
 			fmt.Printf("The total expenses is : $%.2f\n", totalExpense)
-		} else if command == "budget" {
+		case "budget":
 			totalExpense := 0.0
 
 			for _, expense := range expenses {
@@ -210,7 +210,11 @@ func main() {
 			} else {
 				fmt.Printf("Remaining budget: £%.2f\n", remainingExpense)
 			}
+		default:
+			fmt.Println("Command not found !")
+			return
 		}
+
 	} else if len(os.Args) == 8 && os.Args[6] == "--update" {
 
 		id, err := strconv.Atoi(os.Args[3])
