@@ -106,6 +106,55 @@ func loadMonthlyBudgetLimit() (MonthlyBudgetLimit, error) {
 	return monthlyLimit, nil
 }
 
+func listExpenses(expenses []Expense) {
+	if len(expenses) == 0 {
+		fmt.Println("No expenses found.")
+		return
+	}
+
+	for _, expense := range expenses {
+		category := expense.Category
+		if category == "" {
+			category = "UnCategroized"
+		}
+		fmt.Printf("ID: %d | Description: %s | Amount: %.2f | Category: %s | Time: %s\n", expense.ID, expense.Description, expense.Amount, category, expense.Date.Format("2006-01-02"))
+	}
+}
+
+func showSummary(expenses []Expense) {
+	totalExpense := 0.0
+	for _, expense := range expenses {
+		totalExpense += expense.Amount
+	}
+	fmt.Printf("The total expenses is : $%.2f\n", totalExpense)
+}
+
+func showMonthlySummary(expenses []Expense, month int) {
+	if month < 1 || month > 12 {
+		fmt.Println("Please enter a month between 1 & 12.")
+		return
+	}
+	totalExpenseOfMonth := 0.0
+
+	for _, expense := range expenses {
+		if time.Month(month) == expense.Date.Month() {
+			totalExpenseOfMonth += expense.Amount
+		}
+
+	}
+	fmt.Printf("Total Expense of %dth month is: $%.2f\n", month, totalExpenseOfMonth)
+}
+
+func showCategorySummary(expenses []Expense, category string) {
+	totalExpenseOfCategory := 0.0
+	for _, expense := range expenses {
+		if category == expense.Category {
+			totalExpenseOfCategory += expense.Amount
+		}
+	}
+	fmt.Printf("The summary for category %s is : $%.2f \n ", category, totalExpenseOfCategory)
+}
+
 func main() {
 	fmt.Println("Welcome to expense-tracker")
 	expenses, err := loadExpenses()
@@ -164,24 +213,9 @@ func main() {
 		command := os.Args[1]
 		switch command {
 		case "list":
-			if len(expenses) == 0 {
-				fmt.Println("No expenses found.")
-				return
-			}
-
-			for i := range expenses {
-				category := expenses[i].Category
-				if category == "" {
-					category = "UnCategroized"
-				}
-				fmt.Printf("ID: %d | Description: %s | Amount: %.2f | Category: %s | Time: %s\n", expenses[i].ID, expenses[i].Description, expenses[i].Amount, category, expenses[i].Date.Format("2006-01-02"))
-			}
+			listExpenses(expenses)
 		case "summary":
-			totalExpense := 0.0
-			for _, expense := range expenses {
-				totalExpense += expense.Amount
-			}
-			fmt.Printf("The total expenses is : $%.2f\n", totalExpense)
+			showSummary(expenses)
 		case "budget":
 			totalExpense := 0.0
 
@@ -298,30 +332,12 @@ func main() {
 				fmt.Println("Error while converting month to  int.", err)
 				return
 			}
-			if month < 1 || month > 12 {
-				fmt.Println("Please enter a month between 1 & 12.")
-				return
-			}
-			totalExpenseOfMonth := 0.0
-
-			for _, expense := range expenses {
-				if time.Month(month) == expense.Date.Month() {
-					totalExpenseOfMonth += expense.Amount
-				}
-
-			}
-			fmt.Printf("Total Expense of %s is: $%.2f\n", givenMonth, totalExpenseOfMonth)
+			showMonthlySummary(expenses, month)
 
 		} else if os.Args[1] == "summary" && os.Args[2] == "--category" {
 			category := os.Args[3]
 			// fmt.Println(category)
-			totalExpenseOfCategory := 0.0
-			for _, expense := range expenses {
-				if category == expense.Category {
-					totalExpenseOfCategory += expense.Amount
-				}
-			}
-			fmt.Printf("The summary for category %s is : %.2f \n ", category, totalExpenseOfCategory)
+			showCategorySummary(expenses, category)
 		}
 	} else {
 		fmt.Println("Please use correct command")
